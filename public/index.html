@@ -9,10 +9,10 @@
 <body>
     <div id="container">
         <button id="openChat"></button>
-        <div id="chat" class="closed">
-             <ul id="messages"  class="closed"></ul>
-             <form id="form" action="" class="closed">
-                <input id="input" autocomplete="off" /><button>Send</button>
+        <div id="chat" class="open">
+             <ul id="messages"  class="open"></ul>
+             <form id="form" action="" class="open">
+                <input id="input" autocomplete="off" /><button id="btn">Send</button>
              </form>
         </div>
         <div id="gameBoard">
@@ -21,5 +21,6 @@
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat.js"></script>
+    <script src="\CllientSide.js"></script>
 </body>
 </html>

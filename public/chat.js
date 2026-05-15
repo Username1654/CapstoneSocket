@@ -17,6 +17,7 @@
     e.preventDefault();
     if (input.value) {
       socket.emit('chat message', input.value);
+      messages.innerHTML += `<li>You: ${input.value}</li>`
       input.value = '';
 
     }
