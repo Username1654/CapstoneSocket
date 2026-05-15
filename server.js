@@ -12,23 +12,35 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 const currentPeople = {}
+
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.username = "Player-" + Math.floor(Math.random() * 10000);
   socket.emit("assign name", socket.username);
   console.log("a user connected: " + socket.username);
+
   socket.on("player", (playDiv) => {
-    currentPeople[socket.id] = playDiv;
-    socket.emit("player", playDiv);
+    currentPeople[socket.id] = {
+            ...playDiv,
+            id: socket.id 
+        };
+    socket.emit("player", currentPeople[socket.id]);
     for (const id in currentPeople) {
-      if (id !== socket.id) {
-        socket.emit("player", currentPeople[id]);
-      }
-    }
-  });
+            if (id !== socket.id) {
+                socket.emit("player", currentPeople[id]);
+            }
+        }
+    });
   socket.on("move", (data) => {
-    socket.emit("player moved", data);
-  });
+        if (currentPeople[socket.id]) {
+            currentPeople[socket.id].position = data.position;
+          
+            socket.broadcast.emit("player moved", {
+                id: socket.id,
+                position: data.position
+            });
+        }
+    });
   socket.on("disconnect", () => {
     delete currentPeople[socket.id];
     io.emit("remove player", socket.id);
@@ -36,9 +48,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("chat message", (msg) => {
-    console.log("message: " + msg);
-    socket.broadcast.emit("chat message", socket.username + ": " + msg);
-  });
+    io.emit("chat message", {
+        sender: socket.username, 
+        senderID: socket.id,
+        text: msg              
+    });
+});
 });
 
 server.listen(3000, () => {

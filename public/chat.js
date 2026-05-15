@@ -1,5 +1,5 @@
  //chat.js
- const socket = io();
+
   const form = document.getElementById('form');
   const input = document.getElementById('input');
   const messages = document.getElementById('messages');
@@ -17,15 +17,16 @@
     e.preventDefault();
     if (input.value) {
       socket.emit('chat message', input.value);
-      messages.innerHTML += `<li>You: ${input.value}</li>`
+      // messages.innerHTML += `<li>You: ${input.value}</li>`
       input.value = '';
 
     }
 
   });
-  socket.on('chat message', (msg) => {
+ socket.on('chat message', (data) => {
+  console.log("Server says sender is:", data.senderID, "My ID is:", socket.id);
     const item = document.createElement('li');
-    item.textContent = msg;
+    item.innerText= `${data.sender}: ${data.text}`
     messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-  });
+    messages.scrollTop = messages.scrollHeight;
+});
