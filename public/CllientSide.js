@@ -8,6 +8,9 @@ let player = {
     height: "100px",
   },
 };
+let mx = 0
+let my = 0
+const Projectiles = []
 window.addEventListener("keydown", (event) => {
   if (!socket.id || !document.getElementById(socket.id)) return;
   let moved = false;
@@ -38,6 +41,58 @@ window.addEventListener("keydown", (event) => {
     socket.emit("move", { id: socket.id, position: player.position });
   }
 });
+window.addEventListener("click", (x) => {
+  console.log("click")
+  // If the div doesn't exist, CREATE it
+  const uId = Math.random()*10000 +"p"
+    
+  pDiv = document.createElement('div');
+  pDiv.id = uId ;
+  pDiv.className = "projectile";
+  pDiv.style.position = "absolute"; 
+  pDiv.style.width = "50px";
+  pDiv.style.height = "50px";
+  document.getElementById("gameBoard").appendChild(pDiv);
+  const px = player.position.x
+  const py = player.position.y
+  const angle = Math.atan2(mx - px, my - py)
+  const anglex = Math.cos(angle)
+  const angley = Math.sin(angle)
+  const projectile = {
+    anglex,
+    angley,
+    uId
+  }
+  Projectiles.push(projectile)
+  
+
+  socket.emit('projectile', {})
+  
+  
+  addEventListener("mousemove", (x) => {
+    mx = x.clientX
+    my = x.clientY
+
+
+  })
+  setInterval(() => {
+    projectile.forEach((projectile) => {
+      const p = document.getElementById(projectile.uId)
+      p.style.left = p.position.x + 5 * projectile.anglex;
+      p.style.top = p.position.y + 5 * projectile.angley
+
+    })
+
+    
+  },16.67)
+
+  
+
+
+    
+  
+})
+
 function createOrUpdatePlayer(id, data) {
     let pDiv = document.getElementById(id);
     
@@ -51,7 +106,8 @@ function createOrUpdatePlayer(id, data) {
         pDiv.style.height = "50px";
         document.getElementById("gameBoard").appendChild(pDiv);
         console.log("Created new square for:", id);
-    }
+  }
+  
     
     // Always update the position and color
     pDiv.style.backgroundColor = colors[Math.floor(Math.random()*10)];

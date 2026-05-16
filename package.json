@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "ejs": "^5.0.2",
     "express": "^5.2.1",
     "socket.io": "^4.8.3"
   },
@@ -8,8 +9,8 @@
     "nodemon": "^3.1.14"
   },
   "scripts": {
-  "start": "node server.js",
-  "server-watch": "nodemon server.js",
-  "dev": "browser-sync start --proxy localhost:3000 --files \"public/**/*.*\" --no-ui"
-}
+    "start": "node server.js",
+    "server-watch": "nodemon server.js",
+    "dev": "browser-sync start --proxy localhost:3000 --files \"public/**/*.*\" --no-ui"
+  }
 }
