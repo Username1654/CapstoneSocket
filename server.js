@@ -54,6 +54,11 @@ io.on("connection", (socket) => {
         text: msg              
     });
 });
+  socket.on("projectile", (projectiles) => {
+    console.log("projectile received: ", projectiles)
+    socket.broadcast.emit("projectile", projectiles)
+    console.log("projectiles sent to other clients") 
+  });
 });
 
 server.listen(3000, () => {

@@ -46,45 +46,41 @@ window.addEventListener("click", (x) => {
   // If the div doesn't exist, CREATE it
   const uId = Math.random()*10000 +"p"
     
-  pDiv = document.createElement('div');
+  pDiv = document.createElement('div'); 
   pDiv.id = uId ;
   pDiv.className = "projectile";
   pDiv.style.position = "absolute"; 
   pDiv.style.width = "50px";
   pDiv.style.height = "50px";
+  pDiv.style.backgroundColor = "black"
+
   document.getElementById("gameBoard").appendChild(pDiv);
-  const px = player.position.x
-  const py = player.position.y
-  const angle = Math.atan2(mx - px, my - py)
-  const anglex = Math.cos(angle)
-  const angley = Math.sin(angle)
+  const boardRect = gameBoard.getBoundingClientRect();
+  const targetX = x.clientX - boardRect.left;
+  const targetY = x.clientY - boardRect.top;
+  const px = player.position.x + 25;
+  const py = player.position.y + 25;
+  const angle = Math.atan2(targetY - py, targetX - px);
+  const anglex = Math.cos(angle);
+  const angley = Math.sin(angle);
+
+
   const projectile = {
     anglex,
     angley,
-    uId
-  }
-  Projectiles.push(projectile)
+    uId,
+    x: px,
+    y: py,
+    cf: socket.id
+  };
+  Projectiles.push(projectile);
   
-
-  socket.emit('projectile', {})
+  socket.emit('projectile', projectile)
+  ;
   
   
-  addEventListener("mousemove", (x) => {
-    mx = x.clientX
-    my = x.clientY
-
-
-  })
-  setInterval(() => {
-    projectile.forEach((projectile) => {
-      const p = document.getElementById(projectile.uId)
-      p.style.left = p.position.x + 5 * projectile.anglex;
-      p.style.top = p.position.y + 5 * projectile.angley
-
-    })
-
-    
-  },16.67)
+ 
+ 
 
   
 
@@ -92,6 +88,46 @@ window.addEventListener("click", (x) => {
     
   
 })
+ setInterval(() => {
+    Projectiles.forEach((projectile) => {
+      const p = document.getElementById(projectile.uId)
+
+      projectile.x += 5 * projectile.anglex;
+      projectile.y += 5 * projectile.angley;
+
+      p.style.left = projectile.x + "px";
+      p.style.top = projectile.y + "px";
+    })
+  }, 16.67)
+
+   window.addEventListener("mousemove", (x) => {
+    mx = x.clientX
+    my = x.clientY
+    
+
+  })
+  socket.on("projectile", (sp) => {
+      let p = document.getElementById(sp.uId)
+      if (!p) {     
+        const newP = document.createElement("div")
+        newP.id = sp.uId;
+        newP.className = "projectile"
+        newP.style.position = "absolute"
+        newP.style.width = "50px"
+        newP.style.height = "50px"
+        newP.style.backgroundColor = "black"
+        document.getElementById("gameBoard").appendChild(newP)
+        p = newP;
+        Projectiles.push(sp)
+      }
+      
+      sp.x += 5 * sp.anglex;
+      sp.y += 5 * sp.angley;
+
+      p.style.left = sp.x + "px"
+      p.style.top = sp.y + "px"
+    })
+  
 
 function createOrUpdatePlayer(id, data) {
     let pDiv = document.getElementById(id);
@@ -107,6 +143,7 @@ function createOrUpdatePlayer(id, data) {
         document.getElementById("gameBoard").appendChild(pDiv);
         console.log("Created new square for:", id);
   }
+
   
     
     // Always update the position and color
