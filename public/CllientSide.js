@@ -2,12 +2,14 @@ let gameBoard = document.getElementById("gameBoard")
 const colors=["red","green","yellow","blue","brown"]
 let player = {
     position: { x: 100, y: 100 },
+    health:10,
     styles: {
     color: colors[Math.floor(Math.random() * 5)],
     width: "100px",
     height: "100px",
   },
 };
+console.log(player.health)
 let mx = 0
 let my = 0
 const Projectiles = []
@@ -43,7 +45,6 @@ window.addEventListener("keydown", (event) => {
 });
 window.addEventListener("click", (x) => {
   console.log("click")
-  // If the div doesn't exist, CREATE it
   const uId = Math.random()*10000 +"p"
     
   pDiv = document.createElement('div'); 
@@ -89,15 +90,44 @@ window.addEventListener("click", (x) => {
   
 })
  setInterval(() => {
-    Projectiles.forEach((projectile) => {
-      const p = document.getElementById(projectile.uId)
+    for (let i = Projectiles.length - 1; i >= 0; i--) {
+      const projectile = Projectiles[i];
+      const p = document.getElementById(projectile.uId);
+      if (!p) continue;
 
       projectile.x += 5 * projectile.anglex;
       projectile.y += 5 * projectile.angley;
 
       p.style.left = projectile.x + "px";
       p.style.top = projectile.y + "px";
-    })
+
+      if (projectile.cf === socket.id) continue;
+
+      const playerDiv = document.getElementById(socket.id);
+      if (!playerDiv) continue;
+
+      const playerRect = playerDiv.getBoundingClientRect();
+      const projectileRect = p.getBoundingClientRect();
+
+      if (
+        playerRect.left < projectileRect.right &&
+        playerRect.right > projectileRect.left &&
+        playerRect.top < projectileRect.bottom &&
+        playerRect.bottom > projectileRect.top
+      ){
+        console.log("projectile hit player:", projectile.uId, "shooter:", projectile.cf)
+        p.remove()
+        Projectiles.splice(i, 1);
+        socket.emit("hit", { projectileId: projectile.uId, projectileOwner: projectile.cf });
+        
+        player.health  -= 1;
+        console.log("Player health:", player.health);
+        if(player.health <= 0){
+    console.log("you died")
+    window.location = "https://www.google.com/imgres?q=you%20lose&imgurl=https%3A%2F%2Fthumbs.dreamstime.com%2Fb%2Fyou-lose-red-rubber-stamp-over-white-background-86701650.jpg&imgrefurl=https%3A%2F%2Fwww.dreamstime.com%2Fillustration%2Fyou-lose.html&docid=fQ8duyte_Fu2sM&tbnid=gBr7l6ITDLzUIM&vet=12ahUKEwjqpdnf5cCUAxVNDkQIHZ66JtgQnPAOegQIIBAB..i&w=800&h=566&hcb=2&ved=2ahUKEwjqpdnf5cCUAxVNDkQIHZ66JtgQnPAOegQIIBAB"
+  }
+      }
+    }
   }, 16.67)
 
    window.addEventListener("mousemove", (x) => {
@@ -106,6 +136,17 @@ window.addEventListener("click", (x) => {
     
 
   })
+  socket.on("hit", (data) => {
+      console.log("someone was hit")
+      const p = document.getElementById(data.projectileId);
+      if (p) {
+        p.remove();
+      }
+      Projectiles.splice(Projectiles.findIndex(p => p.uId === data.projectileId), 1);
+    }
+
+  ); 
+  
   socket.on("projectile", (sp) => {
       let p = document.getElementById(sp.uId)
       if (!p) {     

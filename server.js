@@ -59,6 +59,10 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("projectile", projectiles)
     console.log("projectiles sent to other clients") 
   });
+  socket.on("hit", (data) => {
+    console.log("hit received: ", data)
+    socket.broadcast.emit("hit", data)
+  });
 });
 
 server.listen(3000, () => {
