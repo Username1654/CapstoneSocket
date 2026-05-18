@@ -62,7 +62,7 @@
 
 #gameBoard{
 grid-column: 2;
-background-color: rgb(232, 232, 232);
+background-color: rgb(164, 164, 164);;
 width: 100%;
 height: 100%;
 position: relative;
